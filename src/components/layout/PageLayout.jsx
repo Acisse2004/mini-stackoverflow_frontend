@@ -1,13 +1,13 @@
-import { useState } from 'react'
 import Navbar from './Navbar'
 import Sidebar from './Sidebar'
 
-export default function PageLayout({ children, onSearch, onTagClick }) {
+// Ce composant enveloppe toutes les pages avec la Navbar et la Sidebar
+export default function PageLayout({ children }) {
   return (
     <div className="app-wrapper">
-      <Navbar onSearch={onSearch} />
+      <Navbar />
       <div className="app-body">
-        <Sidebar onTagClick={onTagClick} />
+        <Sidebar />
         <main className="main-content">
           {children}
         </main>

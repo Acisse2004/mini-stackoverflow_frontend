@@ -1,52 +1,34 @@
-import axios from 'axios'
+const BASE = 'http://localhost:8000/api'
 
-const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
-})
-
-// Injecter le token JWT dans chaque requête
-API.interceptors.request.use(config => {
-  const token = localStorage.getItem('mso_token')
-  if (token) config.headers.Authorization = `Bearer ${token}`
-  return config
-})
+const MOCK_QUESTIONS = [
+  { id:1, title:'Comment utiliser useEffect avec async/await ?', excerpt:'Je veux faire un appel API dans useEffect...', tags:['react','javascript'], votes:24, answersCount:5, solved:true,  author:{pseudo:'alice'}, createdAt:'il y a 2h' },
+  { id:2, title:'Différence entre var, let et const',            excerpt:'Quelle est la vraie différence ?',              tags:['javascript'],        votes:18, answersCount:3, solved:false, author:{pseudo:'bob'},   createdAt:'il y a 5h' },
+  { id:3, title:'PostgreSQL vs MongoDB pour SaaS ?',             excerpt:'Je dois choisir une base de données...',        tags:['python','django'],   votes:31, answersCount:8, solved:true,  author:{pseudo:'charlie'},createdAt:'il y a 1j' },
+  { id:4, title:'JWT refresh tokens avec Express ?',             excerpt:'Je veux sécuriser mon API...',                  tags:['nodejs'],            votes:12, answersCount:2, solved:false, author:{pseudo:'diana'}, createdAt:'il y a 2j' },
+  { id:5, title:'Optimiser les requêtes N+1 avec Prisma',        excerpt:'Mon API est lente à cause de N+1...',           tags:['nodejs','react'],    votes:9,  answersCount:0, solved:false, author:{pseudo:'eric'},  createdAt:'il y a 3j' },
+]
 
 export const questionsApi = {
-  // GET /questions?sort=recent&tag=&search=&page=1
-  getAll: (params = {}) =>
-    API.get('/questions', { params }).then(r => r.data),
-
-  // GET /questions/:id
-  getById: (id) =>
-    API.get(`/questions/${id}`).then(r => r.data),
-
-  // POST /questions
-  create: (payload) =>
-    API.post('/questions', payload).then(r => r.data),
-
-  // PUT /questions/:id/vote
-  vote: (id, direction) =>
-    API.put(`/questions/${id}/vote`, { direction }).then(r => r.data),
+  getAll: async ({ sort, tag, search } = {}) => {
+    let list = [...MOCK_QUESTIONS]
+    if (search) list = list.filter(q =>
+      q.title.toLowerCase().includes(search.toLowerCase()) ||
+      q.tags.some(t => t.includes(search.toLowerCase()))
+    )
+    if (tag) list = list.filter(q => q.tags.includes(tag))
+    if (sort === 'votes') list.sort((a,b) => b.votes - a.votes)
+    else if (sort === 'unanswered') list = list.filter(q => q.answersCount === 0)
+    return { questions: list, total: list.length }
+  },
+  getById: async (id) => MOCK_QUESTIONS.find(q => q.id === parseInt(id)) || null,
+  create: async (form) => ({ id: Date.now(), ...form, votes:0, answersCount:0, solved:false }),
 }
 
 export const answersApi = {
-  // GET /questions/:questionId/answers
-  getByQuestion: (questionId) =>
-    API.get(`/questions/${questionId}/answers`).then(r => r.data),
-
-  // POST /questions/:questionId/answers
-  create: (questionId, body) =>
-    API.post(`/questions/${questionId}/answers`, { body }).then(r => r.data),
-
-  // PUT /answers/:id/vote
-  vote: (id, direction) =>
-    API.put(`/answers/${id}/vote`, { direction }).then(r => r.data),
-
-  // PUT /answers/:id/accept
-  accept: (id) =>
-    API.put(`/answers/${id}/accept`).then(r => r.data),
-
-  // POST /answers/:id/comments
-  addComment: (id, text) =>
-    API.post(`/answers/${id}/comments`, { text }).then(r => r.data),
+  getByQuestion: async (id) => [],
+  create: async (questionId, body) => ({
+    id: Date.now(), body, votes:0, accepted:false,
+    author:{ pseudo:'moi' }, createdAt:'à l\'instant'
+  }),
+  accept: async (answerId) => ({ success: true }),
 }

@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import PageLayout from '../components/layout/PageLayout'
 import MarkdownEditor from '../components/questions/MarkdownEditor'
-import TagBadge from '../components/questions/TagBadge'
 import { questionsApi } from '../api/questionsApi'
 
 export default function AskQuestionPage() {
@@ -13,7 +12,7 @@ export default function AskQuestionPage() {
   const [loading, setLoading] = useState(false)
 
   const addTag = () => {
-    const t = tagInput.trim().toLowerCase()
+    const t = tagInput.trim().toLowerCase().replace(/\s+/g, '-')
     if (t && form.tags.length < 5 && !form.tags.includes(t)) {
       setForm(f => ({ ...f, tags: [...f.tags, t] }))
     }
@@ -25,9 +24,12 @@ export default function AskQuestionPage() {
 
   const validate = () => {
     const e = {}
-    if (form.title.trim().length < 10) e.title = 'Le titre doit faire au moins 10 caractères.'
-    if (form.body.trim().length < 20)  e.body = 'La description doit faire au moins 20 caractères.'
-    if (form.tags.length === 0)        e.tags = 'Ajoutez au moins 1 tag.'
+    if (form.title.trim().length < 10)
+      e.title = 'Le titre doit faire au moins 10 caracteres.'
+    if (form.body.trim().length < 20)
+      e.body = 'La description doit faire au moins 20 caracteres.'
+    if (form.tags.length === 0)
+      e.tags = 'Ajoutez au moins 1 tag.'
     return e
   }
 
@@ -46,110 +48,141 @@ export default function AskQuestionPage() {
     }
   }
 
+  const Card = ({ children }) => (
+    <div style={{
+      background: '#fff', border: '1px solid #d6d9dc',
+      borderRadius: 8, padding: 20, marginBottom: 14,
+    }}>
+      {children}
+    </div>
+  )
+
   return (
     <PageLayout>
-      <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>Poser une question</h1>
-      <p style={{ fontSize: 13, color: '#525960', marginBottom: 20 }}>
-        Partagez votre problème clairement pour obtenir de l'aide rapidement.
-      </p>
+      <div className="page-header">
+        <h1 className="page-title">Poser une question</h1>
+      </div>
 
-      {/* Conseils */}
-      <div style={{
-        background: '#fdf7f2', border: '1px solid #f1d4b5',
-        borderRadius: 6, padding: '14px 16px', marginBottom: 24, fontSize: 13,
-      }}>
+      <div className="alert alert-warning" style={{ marginBottom: 20 }}>
         <strong>Conseils pour une bonne question :</strong>
-        <ul style={{ marginTop: 6, marginLeft: 20, lineHeight: 1.8, color: '#525960' }}>
-          <li>Décrivez le problème précisément</li>
-          <li>Partagez le code ou les messages d'erreur</li>
-          <li>Expliquez ce que vous avez déjà essayé</li>
+        <ul style={{ marginTop: 6, marginLeft: 18, lineHeight: 1.8, fontSize: 13 }}>
+          <li>Resumez le probleme dans le titre</li>
+          <li>Partagez le code ou le message d'erreur exact</li>
+          <li>Expliquez ce que vous avez deja essaye</li>
         </ul>
       </div>
 
-      {errors.global && (
-        <div style={{
-          background: '#fde8e8', border: '1px solid #e89898',
-          borderRadius: 4, padding: '8px 12px', fontSize: 13,
-          color: '#a01f1f', marginBottom: 14,
-        }}>{errors.global}</div>
-      )}
+      {errors.global && <div className="alert alert-error">{errors.global}</div>}
 
       <form onSubmit={handleSubmit}>
+
         {/* Titre */}
-        <div style={{
-          background: '#fff', border: '1px solid #d6d9dc',
-          borderRadius: 6, padding: '16px', marginBottom: 14,
-        }}>
-          <label className="form-label">Titre</label>
-          <div className="form-hint">Soyez spécifique et imaginez que vous posez la question à quelqu'un en face</div>
-          <input
-            className="form-input"
-            value={form.title}
-            onChange={e => setForm({ ...form, title: e.target.value })}
-            placeholder="Ex: Comment centrer un div verticalement avec Flexbox ?"
-          />
-          {errors.title && <div className="form-error">{errors.title}</div>}
-        </div>
+        <Card>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label">Titre</label>
+            <div className="form-hint">
+              Soyez precis et imaginez que vous posez la question a quelqu'un
+            </div>
+            <input
+              className="form-input"
+              value={form.title}
+              onChange={e => setForm({ ...form, title: e.target.value })}
+              placeholder="Ex : Comment centrer un div verticalement avec Flexbox ?"
+              maxLength={200}
+              autoFocus
+            />
+            {errors.title && <div className="form-error">{errors.title}</div>}
+            <div style={{ fontSize: 11, color: '#838c95', marginTop: 4, textAlign: 'right' }}>
+              {form.title.length}/200
+            </div>
+          </div>
+        </Card>
 
         {/* Description */}
-        <div style={{
-          background: '#fff', border: '1px solid #d6d9dc',
-          borderRadius: 6, padding: '16px', marginBottom: 14,
-        }}>
-          <label className="form-label">Description</label>
-          <div className="form-hint">Expliquez en détail le problème, incluez le code si nécessaire (Markdown supporté)</div>
-          <MarkdownEditor
-            value={form.body}
-            onChange={body => setForm({ ...form, body })}
-            placeholder={'Décrivez votre problème...\n\n```javascript\n// votre code ici\n```'}
-          />
-          {errors.body && <div className="form-error">{errors.body}</div>}
-        </div>
+        <Card>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label">Description</label>
+            <div className="form-hint">
+              Expliquez en detail votre probleme. Markdown supporte.
+            </div>
+            <MarkdownEditor
+              value={form.body}
+              onChange={body => setForm({ ...form, body })}
+              placeholder="Decrivez votre probleme..."
+            />
+            {errors.body && <div className="form-error">{errors.body}</div>}
+          </div>
+        </Card>
 
         {/* Tags */}
-        <div style={{
-          background: '#fff', border: '1px solid #d6d9dc',
-          borderRadius: 6, padding: '16px', marginBottom: 20,
-        }}>
-          <label className="form-label">Tags</label>
-          <div className="form-hint">Ajoutez jusqu'à 5 tags pour décrire votre question</div>
-          <div style={{
-            display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center',
-            border: '1px solid #d6d9dc', borderRadius: 4, padding: '6px 8px',
-            minHeight: 38,
-          }}>
-            {form.tags.map(t => (
-              <span key={t} style={{
-                display: 'inline-flex', alignItems: 'center', gap: 4,
-                padding: '2px 8px', background: '#e1ecf4',
-                color: '#39739d', fontSize: 12, borderRadius: 4,
-              }}>
-                {t}
-                <button type="button" onClick={() => removeTag(t)} style={{
-                  background: 'none', border: 'none', cursor: 'pointer',
-                  color: '#39739d', fontSize: 14, lineHeight: 1, padding: 0,
-                }}>×</button>
-              </span>
-            ))}
-            <input
-              value={tagInput}
-              onChange={e => setTagInput(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTag() } }}
-              placeholder={form.tags.length < 5 ? 'ex: python, react…' : 'Maximum 5 tags'}
-              disabled={form.tags.length >= 5}
-              style={{ border: 'none', outline: 'none', fontSize: 13, flexGrow: 1, minWidth: 80 }}
-            />
+        <Card>
+          <div className="form-group" style={{ marginBottom: 16 }}>
+            <label className="form-label">Etiquettes</label>
+            <div className="form-hint">
+              Ajoutez jusqu'a 5 tags pour categoriser votre question
+            </div>
+            <div style={{
+              display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center',
+              border: '1px solid #d6d9dc', borderRadius: 4,
+              padding: '6px 10px', minHeight: 40, background: '#fff',
+            }}>
+              {form.tags.map(t => (
+                <span key={t} style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 5,
+                  padding: '2px 9px', background: '#e1ecf4',
+                  color: '#39739d', fontSize: 12, borderRadius: 4,
+                }}>
+                  {t}
+                  <button
+                    type="button"
+                    onClick={() => removeTag(t)}
+                    style={{
+                      background: 'none', border: 'none', cursor: 'pointer',
+                      color: '#39739d', fontSize: 15, lineHeight: 1, padding: 0,
+                    }}
+                  >×</button>
+                </span>
+              ))}
+              <input
+                value={tagInput}
+                onChange={e => setTagInput(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addTag() }
+                  if (e.key === 'Backspace' && !tagInput && form.tags.length) {
+                    removeTag(form.tags[form.tags.length - 1])
+                  }
+                }}
+                placeholder={form.tags.length < 5 ? 'ex: javascript, react...' : 'Maximum atteint'}
+                disabled={form.tags.length >= 5}
+                style={{
+                  border: 'none', outline: 'none', fontSize: 13,
+                  flexGrow: 1, minWidth: 100, background: 'transparent',
+                }}
+              />
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
+              <button
+                type="button" onClick={addTag}
+                style={{ fontSize: 12, color: '#0077cc', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+              >
+                + Ajouter ce tag
+              </button>
+              <span style={{ fontSize: 11, color: '#838c95' }}>{form.tags.length}/5 tags</span>
+            </div>
+            {errors.tags && <div className="form-error">{errors.tags}</div>}
           </div>
-          <button type="button" onClick={addTag} style={{
-            marginTop: 6, fontSize: 12, color: '#0077cc',
-            background: 'none', border: 'none', cursor: 'pointer',
-          }}>+ Ajouter ce tag</button>
-          {errors.tags && <div className="form-error">{errors.tags}</div>}
-        </div>
 
-        <button type="submit" className="btn btn-primary" disabled={loading} style={{ fontSize: 14 }}>
-          {loading ? 'Publication...' : 'Publier la question'}
-        </button>
+          {/* Bouton publier */}
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={loading}
+            style={{ fontSize: 14, padding: '10px 20px' }}
+          >
+            {loading ? 'Publication en cours...' : 'Publier la question'}
+          </button>
+        </Card>
+
       </form>
     </PageLayout>
   )

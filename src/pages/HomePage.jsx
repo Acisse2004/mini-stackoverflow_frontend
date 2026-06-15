@@ -5,15 +5,16 @@ import QuestionCard from '../components/questions/QuestionCard'
 import { questionsApi } from '../api/questionsApi'
 
 const SORTS = [
-  { key: 'recent',     label: 'Récentes' },
-  { key: 'votes',      label: 'Votes' },
+  { key: 'recent',     label: 'Récentes'    },
+  { key: 'votes',      label: 'Plus votées' },
   { key: 'unanswered', label: 'Sans réponse' },
 ]
 
 export default function HomePage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [questions, setQuestions] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [total, setTotal]         = useState(0)
+  const [loading, setLoading]     = useState(true)
 
   const sort   = searchParams.get('sort')   || 'recent'
   const tag    = searchParams.get('tag')    || ''
@@ -22,7 +23,16 @@ export default function HomePage() {
   useEffect(() => {
     setLoading(true)
     questionsApi.getAll({ sort, tag, search })
-      .then(setQuestions)
+      .then(data => {
+        // Le backend peut retourner { questions, total } ou directement un tableau
+        if (Array.isArray(data)) {
+          setQuestions(data)
+          setTotal(data.length)
+        } else {
+          setQuestions(data.questions || [])
+          setTotal(data.total || 0)
+        }
+      })
       .catch(console.error)
       .finally(() => setLoading(false))
   }, [sort, tag, search])
@@ -34,25 +44,27 @@ export default function HomePage() {
     setSearchParams(p)
   }
 
+  const clearFilters = () => setSearchParams({})
+
+  // Titre dynamique selon les filtres actifs
+  const pageTitle = tag    ? `Questions : #${tag}`
+                  : search ? `Résultats pour "${search}"`
+                  : 'Toutes les questions'
+
   return (
-    <PageLayout
-      onSearch={q => setParam('search', q)}
-      onTagClick={t => setParam('tag', t)}
-    >
+    <PageLayout>
       {/* En-tête */}
-      <div style={{
-        display: 'flex', alignItems: 'center',
-        justifyContent: 'space-between', marginBottom: 16,
-      }}>
+      <div className="page-header">
         <div>
-          <h1 style={{ fontSize: 20, fontWeight: 700 }}>
-            {tag    ? `Questions : ${tag}` :
-             search ? `Résultats : "${search}"` :
-             'Toutes les questions'}
-          </h1>
+          <h1 className="page-title">{pageTitle}</h1>
           {(tag || search) && (
-            <button onClick={() => setSearchParams({})}
-              style={{ fontSize: 12, color: '#525960', background: 'none', border: 'none', cursor: 'pointer', marginTop: 4 }}>
+            <button
+              onClick={clearFilters}
+              style={{
+                fontSize: 12, color: '#525960', background: 'none',
+                border: 'none', cursor: 'pointer', marginTop: 4, padding: 0,
+              }}
+            >
               × Effacer le filtre
             </button>
           )}
@@ -64,38 +76,56 @@ export default function HomePage() {
 
       {/* Filtres de tri */}
       <div style={{
-        display: 'flex', gap: 4, marginBottom: 14,
-        background: '#fff', border: '1px solid #d6d9dc',
-        borderRadius: 4, padding: 4, width: 'fit-content',
+        display: 'flex', alignItems: 'center',
+        justifyContent: 'space-between', marginBottom: 16,
       }}>
-        {SORTS.map(s => (
-          <button key={s.key} onClick={() => setParam('sort', s.key)} style={{
-            padding: '5px 12px', fontSize: 13, borderRadius: 3,
-            border: 'none', cursor: 'pointer',
-            background: sort === s.key ? '#f48024' : 'transparent',
-            color: sort === s.key ? '#fff' : '#525960',
-            fontWeight: sort === s.key ? 600 : 400,
-          }}>
-            {s.label}
-          </button>
-        ))}
+        <div style={{
+          display: 'flex', gap: 0,
+          background: '#fff', border: '1px solid #d6d9dc',
+          borderRadius: 4, overflow: 'hidden',
+        }}>
+          {SORTS.map(s => (
+            <button
+              key={s.key}
+              onClick={() => setParam('sort', s.key)}
+              style={{
+                padding: '6px 14px', fontSize: 13, border: 'none',
+                cursor: 'pointer', borderRight: '1px solid #d6d9dc',
+                background: sort === s.key ? '#f48024' : '#fff',
+                color: sort === s.key ? '#fff' : '#525960',
+                fontWeight: sort === s.key ? 600 : 400,
+                transition: 'all 0.15s',
+              }}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
+        {!loading && (
+          <span style={{ fontSize: 13, color: '#838c95' }}>
+            {total} question{total !== 1 ? 's' : ''}
+          </span>
+        )}
       </div>
 
-      {/* Liste */}
+      {/* Liste de questions */}
       {loading ? (
         <div className="spinner" />
       ) : questions.length === 0 ? (
         <div className="empty-state">
           <h3>Aucune question trouvée</h3>
-          <p>Soyez le premier à poser une question !</p>
+          <p>
+            {search || tag
+              ? 'Essayez avec d\'autres mots-clés ou supprimez les filtres.'
+              : 'Soyez le premier à poser une question !'}
+          </p>
           <Link to="/ask">
-            <button className="btn btn-primary" style={{ marginTop: 14 }}>Poser une question</button>
+            <button className="btn btn-primary">Poser une question</button>
           </Link>
         </div>
       ) : (
         questions.map(q => (
-          <QuestionCard key={q.id} question={q}
-            onTagClick={t => setParam('tag', t)} />
+          <QuestionCard key={q.id} question={q} />
         ))
       )}
     </PageLayout>

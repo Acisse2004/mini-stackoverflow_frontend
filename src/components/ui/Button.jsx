@@ -1,6 +1,8 @@
+// Bouton réutilisable avec variantes
 export default function Button({
   children, variant = 'ghost', onClick,
-  disabled = false, type = 'button', fullWidth = false, style = {}
+  disabled = false, type = 'button',
+  fullWidth = false, style = {},
 }) {
   return (
     <button
@@ -8,7 +10,7 @@ export default function Button({
       onClick={onClick}
       disabled={disabled}
       className={`btn btn-${variant}`}
-      style={{ width: fullWidth ? '100%' : undefined, ...style }}
+      style={{ width: fullWidth ? '100%' : undefined, justifyContent: fullWidth ? 'center' : undefined, ...style }}
     >
       {children}
     </button>
