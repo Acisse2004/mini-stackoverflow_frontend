@@ -3,26 +3,26 @@
    ============================================================ */
 :root {
   --bg:           #ffffff;
-  --bg-2:         #f6f6f6;
-  --bg-3:         #eff0f1;
-  --border:       #d6d9dc;
-  --border-2:     #e3e6e8;
-  --text:         #232629;
-  --text-2:       #525960;
-  --text-3:       #838c95;
-  --accent:       #f48024;
-  --accent-hover: #e8700a;
-  --blue:         #0077cc;
-  --blue-bg:      #e1ecf4;
-  --blue-text:    #39739d;
-  --green:        #2d7d32;
-  --green-bg:     #e6f4ea;
-  --red:          #c32525;
-  --red-bg:       #fde8e8;
-  --radius:       4px;
-  --radius-lg:    8px;
-  --shadow:       0 1px 3px rgba(0,0,0,0.08);
-  --shadow-md:    0 2px 8px rgba(0,0,0,0.12);
+  --bg-2:         #f3f6fb;
+  --bg-3:         #eef2f8;
+  --border:       #d7e1ee;
+  --border-2:     #e4ebf3;
+  --text:         #1c2b3a;
+  --text-2:       #4b5d70;
+  --text-3:       #82929f;
+  --accent:       #2563eb;
+  --accent-hover: #1d4ed8;
+  --blue:         #0ea5e9;
+  --blue-bg:      #e6f4fb;
+  --blue-text:    #0369a1;
+  --green:        #1f8a4c;
+  --green-bg:     #e7f7ee;
+  --red:          #d23a3a;
+  --red-bg:       #fdeaea;
+  --radius:       6px;
+  --radius-lg:    10px;
+  --shadow:       0 1px 3px rgba(37,99,235,0.08);
+  --shadow-md:    0 4px 14px rgba(37,99,235,0.12);
 }
 
 /* ============================================================
@@ -48,8 +48,8 @@ input, textarea, select {
   outline: none; transition: border-color 0.15s, box-shadow 0.15s;
 }
 input:focus, textarea:focus {
-  border-color: var(--blue);
-  box-shadow: 0 0 0 3px rgba(0,119,204,0.12);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.14);
 }
 code, pre { font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 12px; }
 
@@ -92,10 +92,10 @@ code, pre { font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 12
    ALERTES
    ============================================================ */
 .alert { padding: 10px 14px; border-radius: var(--radius); font-size: 13px; margin-bottom: 14px; border: 1px solid; }
-.alert-error   { background: var(--red-bg); border-color: #e89898; color: #a01f1f; }
-.alert-success { background: var(--green-bg); border-color: #a5d6a7; color: #1b5e20; }
-.alert-info    { background: var(--blue-bg); border-color: #90caf9; color: #0d47a1; }
-.alert-warning { background: #fff8e1; border-color: #ffe082; color: #e65100; }
+.alert-error   { background: var(--red-bg); border-color: #f0b8b8; color: #a01f1f; }
+.alert-success { background: var(--green-bg); border-color: #aee0c4; color: #155d34; }
+.alert-info    { background: var(--blue-bg); border-color: #a7dcf2; color: #0369a1; }
+.alert-warning { background: #fff6e0; border-color: #ffe49a; color: #8a5a00; }
 
 /* ============================================================
    TAGS
@@ -107,9 +107,9 @@ code, pre { font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 12
   cursor: pointer; border: 1px solid transparent;
   transition: background 0.1s; user-select: none;
 }
-.tag:hover { background: #d0e3f1; }
-.tag-hot   { background: #fff8e1; color: #c7811f; }
-.tag-hot:hover { background: #fff0c2; }
+.tag:hover { background: #cfeaf8; }
+.tag-hot   { background: #fff3da; color: #b6720a; }
+.tag-hot:hover { background: #ffe8b8; }
 
 /* ============================================================
    VOTES
@@ -121,7 +121,7 @@ code, pre { font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 12
   display: flex; align-items: center; justify-content: center;
   font-size: 20px; color: var(--text-3); transition: all 0.15s;
 }
-.vote-btn:hover { border-color: var(--accent); color: var(--accent); background: #fff8f2; }
+.vote-btn:hover { border-color: var(--accent); color: var(--accent); background: #eef4ff; }
 .vote-btn.voted-up   { background: var(--accent); color: #fff; border-color: var(--accent); }
 .vote-btn.voted-down { background: var(--text-3); color: #fff; border-color: var(--text-3); }
 .vote-count { font-size: 18px; font-weight: 700; color: var(--text); }
@@ -133,9 +133,9 @@ code, pre { font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 12
   background: var(--bg); border: 1px solid var(--border-2);
   border-radius: var(--radius-lg); padding: 14px 16px;
   margin-bottom: 10px; display: flex; gap: 16px;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
-.post-card:hover { border-color: var(--border); box-shadow: var(--shadow); }
+.post-card:hover { border-color: #bcd2ee; box-shadow: var(--shadow); }
 
 /* ============================================================
    BADGE ACCEPTE
@@ -144,7 +144,7 @@ code, pre { font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 12
   display: inline-flex; align-items: center; gap: 4px;
   font-size: 12px; font-weight: 600; color: var(--green);
   background: var(--green-bg); padding: 2px 9px; border-radius: var(--radius);
-  border: 1px solid #a5d6a7;
+  border: 1px solid #aee0c4;
 }
 
 /* ============================================================

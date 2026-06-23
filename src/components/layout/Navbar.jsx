@@ -19,9 +19,9 @@ export default function Navbar() {
   return (
     <header style={{
       background: '#fff',
-      borderBottom: '1px solid #e3e6e8',
+      borderBottom: '1px solid #e4ebf3',
       position: 'sticky', top: 0, zIndex: 100,
-      boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+      boxShadow: '0 1px 3px rgba(37,99,235,0.08)',
     }}>
       <div style={{
         maxWidth: 1100, margin: '0 auto', padding: '0 16px',
@@ -34,11 +34,11 @@ export default function Navbar() {
           textDecoration: 'none', flexShrink: 0,
         }}>
           <span style={{
-            background: '#f48024', color: '#fff',
+            background: '#2563eb', color: '#fff',
             padding: '3px 9px', borderRadius: 4,
             fontWeight: 800, fontSize: 15,
           }}>S</span>
-          <span style={{ fontWeight: 700, fontSize: 15, color: '#232629' }}>
+          <span style={{ fontWeight: 700, fontSize: 15, color: '#1c2b3a' }}>
             Mini StackOverflow
           </span>
         </Link>
@@ -47,10 +47,10 @@ export default function Navbar() {
         <form onSubmit={handleSearch} style={{ flex: 1, maxWidth: 520 }}>
           <div style={{
             display: 'flex', alignItems: 'center', gap: 8,
-            background: '#fff', border: '1px solid #d6d9dc',
+            background: '#fff', border: '1px solid #d7e1ee',
             borderRadius: 4, padding: '5px 10px',
           }}>
-            <svg width="14" height="14" fill="none" stroke="#838c95" strokeWidth="2" style={{ flexShrink: 0 }}>
+            <svg width="14" height="14" fill="none" stroke="#82929f" strokeWidth="2" style={{ flexShrink: 0 }}>
               <circle cx="6" cy="6" r="5"/>
               <line x1="10" y1="10" x2="13" y2="13"/>
             </svg>
@@ -74,13 +74,13 @@ export default function Navbar() {
               <Link to={`/user/${user.id}`}>
                 <Avatar name={user.pseudo} size={30} src={user.avatar} />
               </Link>
-              <span style={{ fontSize: 13, color: '#525960' }}>{user.pseudo}</span>
+              <span style={{ fontSize: 13, color: '#4b5d70' }}>{user.pseudo}</span>
               <button
                 onClick={logout}
                 style={{
                   fontSize: 12, padding: '5px 12px',
-                  border: '1px solid #d6d9dc', borderRadius: 4,
-                  background: 'transparent', cursor: 'pointer', color: '#525960',
+                  border: '1px solid #d7e1ee', borderRadius: 4,
+                  background: 'transparent', cursor: 'pointer', color: '#4b5d70',
                 }}
               >
                 Déconnexion
@@ -91,8 +91,8 @@ export default function Navbar() {
               <Link to="/login">
                 <button style={{
                   fontSize: 12, padding: '5px 12px',
-                  border: '1px solid #0077cc', borderRadius: 4,
-                  background: 'transparent', cursor: 'pointer', color: '#0077cc',
+                  border: '1px solid #0ea5e9', borderRadius: 4,
+                  background: 'transparent', cursor: 'pointer', color: '#0369a1',
                 }}>
                   Connexion
                 </button>
@@ -101,7 +101,7 @@ export default function Navbar() {
                 <button style={{
                   fontSize: 12, padding: '5px 12px',
                   border: 'none', borderRadius: 4,
-                  background: '#f48024', cursor: 'pointer', color: '#fff',
+                  background: '#2563eb', cursor: 'pointer', color: '#fff',
                 }}>
                   Inscription
                 </button>

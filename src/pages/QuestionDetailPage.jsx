@@ -36,12 +36,11 @@ export default function QuestionDetailPage() {
       .finally(() => setLoading(false))
   }, [id])
 
-  // Soumettre une réponse
   const handleSubmitAnswer = async (e) => {
     e.preventDefault()
     if (!newAnswer.trim()) return
     if (newAnswer.trim().length < 20) {
-      setError('La réponse doit faire au moins 20 caractères.')
+      setError('La reponse doit faire au moins 20 caracteres.')
       return
     }
     setError('')
@@ -50,16 +49,14 @@ export default function QuestionDetailPage() {
       const created = await answersApi.create(id, newAnswer)
       setAnswers(prev => [...prev, created])
       setNewAnswer('')
-      // Mise à jour du compteur dans la question
       setQuestion(q => ({ ...q, answersCount: (q.answersCount || 0) + 1 }))
     } catch (e) {
-      setError('Erreur lors de la publication de votre réponse.')
+      setError('Erreur lors de la publication de votre reponse.')
     } finally {
       setSubmitting(false)
     }
   }
 
-  // Marquer une réponse comme meilleure
   const handleAccept = async (answerId) => {
     try {
       await answersApi.accept(answerId)
@@ -70,134 +67,162 @@ export default function QuestionDetailPage() {
     }
   }
 
+  const handleDeleteAnswer = (answerId) => {
+    setAnswers(prev => prev.filter(a => a.id !== answerId))
+    setQuestion(q => ({ ...q, answersCount: Math.max((q.answersCount || answers.length) - 1, 0) }))
+  }
+
+  const handleUpdateAnswer = (answerId, updated) => {
+    setAnswers(prev => prev.map(a => (a.id === answerId ? updated : a)))
+  }
+
   if (loading) return <PageLayout><div className="spinner" /></PageLayout>
+
   if (!question) return (
     <PageLayout>
       <div className="empty-state">
         <h3>Question introuvable</h3>
-        <p>Cette question n'existe pas ou a été supprimée.</p>
-        <Link to="/"><button className="btn btn-primary">Retour à l'accueil</button></Link>
+        <p>Cette question n'existe pas ou a ete supprimee.</p>
+        <Link to="/"><button className="btn btn-primary">Retour a l'accueil</button></Link>
       </div>
     </PageLayout>
   )
 
+  const tags = question.tags || []
+  const authorName = question.author?.pseudo || question.author?.username || '?'
+
   return (
     <PageLayout>
+
       {/* Bouton retour */}
       <button
         className="btn btn-ghost"
         onClick={() => navigate(-1)}
         style={{ marginBottom: 14, fontSize: 12 }}
       >
-        ← Retour
+        &larr; Retour
       </button>
 
-      {/* Titre de la question */}
-      <div style={{ paddingBottom: 14, borderBottom: '1px solid #e3e6e8', marginBottom: 18 }}>
-        <h1 style={{ fontSize: 20, fontWeight: 700, lineHeight: 1.4, marginBottom: 8 }}>
+      {/* En-tete question */}
+      <div style={{ marginBottom: 20, paddingBottom: 16, borderBottom: '1px solid #e3e6e8' }}>
+        <h1 style={{ fontSize: 20, fontWeight: 700, lineHeight: 1.4, marginBottom: 10 }}>
           {question.title}
         </h1>
-        <div style={{ display: 'flex', gap: 16, fontSize: 12, color: '#525960', flexWrap: 'wrap' }}>
-          <span>Posée {question.createdAt}</span>
-          <span>{question.views || 0} vues</span>
-          <span>{answers.length} réponse{answers.length !== 1 ? 's' : ''}</span>
+        <div style={{ display: 'flex', gap: 16, fontSize: 12, color: '#838c95', flexWrap: 'wrap' }}>
+          <span>Posee le {question.createdAt || question.created_at}</span>
+          <span>Modifiee {question.updatedAt || question.updated_at}</span>
+          <span>{question.answersCount || answers.length} reponse(s)</span>
         </div>
       </div>
 
-      {/* Corps de la question */}
-      <div style={{ display: 'flex', gap: 16, paddingBottom: 18, borderBottom: '1px solid #e3e6e8' }}>
+      {/* Corps question + votes */}
+      <div style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
         <VoteButtons
-          initialVotes={question.votes || 0}
+          initialVotes={question.vote_count || question.votes || 0}
           onVote={dir => questionsApi.vote(id, dir)}
         />
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div className="md-body" style={{ marginBottom: 14 }}>
-            <ReactMarkdown>{question.body}</ReactMarkdown>
+        <div style={{ flex: 1 }}>
+          <div className="md-body" style={{ marginBottom: 16 }}>
+            <ReactMarkdown>{question.description || question.body || ''}</ReactMarkdown>
           </div>
 
           {/* Tags */}
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 14 }}>
-            {(question.tags || []).map(t => <TagBadge key={t} label={t} />)}
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
+            {tags.map(tag => (
+              <TagBadge
+                key={typeof tag === 'object' ? tag.id : tag}
+                label={typeof tag === 'object' ? tag.name : tag}
+              />
+            ))}
           </div>
 
-          {/* Actions + auteur */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-            <div style={{ display: 'flex', gap: 12, fontSize: 12, color: '#525960' }}>
-              <span style={{ cursor: 'pointer' }}>Partager</span>
-              {user && user.id === question.author?.id && (
-                <>
-                  <span style={{ cursor: 'pointer', color: '#0077cc' }}>Modifier</span>
-                  <span style={{ cursor: 'pointer', color: '#c32525' }}>Supprimer</span>
-                </>
-              )}
-            </div>
+          {/* Auteur */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <div style={{
-              background: '#e1ecf4', borderRadius: 4, padding: '8px 12px',
-              display: 'flex', gap: 8, alignItems: 'center',
+              background: '#e1ecf4', borderRadius: 4,
+              padding: '8px 12px', display: 'flex',
+              gap: 8, alignItems: 'center',
             }}>
-              <div style={{ fontSize: 11, color: '#525960' }}>Posée par</div>
-              <Avatar name={question.author?.pseudo || '?'} size={22} src={question.author?.avatar} />
-              <Link to={`/user/${question.author?.id}`} style={{ fontSize: 12, color: '#0077cc' }}>
-                {question.author?.pseudo}
+              <div style={{ fontSize: 11, color: '#525960' }}>
+                Posee par
+              </div>
+              <Avatar name={authorName} size={20} src={question.author?.avatar} />
+              <Link
+                to={`/user/${question.author?.id}`}
+                style={{ fontSize: 12, color: '#0077cc' }}
+              >
+                {authorName}
               </Link>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Section des réponses */}
-      <h2 style={{ fontSize: 17, fontWeight: 700, margin: '22px 0 10px' }}>
-        {answers.length} réponse{answers.length !== 1 ? 's' : ''}
-      </h2>
+      {/* Reponses */}
+      <div style={{ marginBottom: 24 }}>
+        <h2 style={{ fontSize: 17, fontWeight: 700, marginBottom: 14 }}>
+          {answers.length} reponse{answers.length !== 1 ? 's' : ''}
+        </h2>
+        {answers.length === 0 ? (
+          <p style={{ color: '#838c95', fontSize: 13 }}>
+            Aucune reponse pour l'instant. Soyez le premier a repondre !
+          </p>
+        ) : (
+          answers.map(answer => (
+            <AnswerItem
+              key={answer.id}
+              answer={answer}
+              questionAuthorId={question.author?.id}
+              onAccept={handleAccept}
+              onDelete={handleDeleteAnswer}
+              onUpdate={handleUpdateAnswer}
+            />
+          ))
+        )}
+      </div>
 
-      {answers.length === 0 && (
-        <p style={{ color: '#838c95', fontSize: 14, marginBottom: 20 }}>
-          Aucune réponse pour l'instant. Soyez le premier à répondre !
-        </p>
-      )}
-
-      {answers.map(a => (
-        <AnswerItem
-          key={a.id}
-          answer={a}
-          questionAuthorId={question.author?.id}
-          onAccept={handleAccept}
-        />
-      ))}
-
-      {/* Formulaire pour répondre */}
+      {/* Formulaire reponse */}
       {user ? (
-        <div style={{ marginTop: 28, paddingTop: 20, borderTop: '1px solid #e3e6e8' }}>
-          <h2 style={{ fontSize: 17, fontWeight: 700, marginBottom: 14 }}>Votre réponse</h2>
-          {error && <div className="alert alert-error">{error}</div>}
+        <div style={{ marginTop: 24 }}>
+          <h2 style={{ fontSize: 17, fontWeight: 700, marginBottom: 14 }}>
+            Votre reponse
+          </h2>
+          {error && (
+            <div className="alert alert-error" style={{ marginBottom: 12 }}>
+              {error}
+            </div>
+          )}
           <form onSubmit={handleSubmitAnswer}>
             <MarkdownEditor
               value={newAnswer}
               onChange={setNewAnswer}
-              placeholder="Rédigez votre réponse en Markdown..."
+              placeholder="Ecrivez votre reponse ici... (minimum 20 caracteres)"
             />
             <button
               type="submit"
               className="btn btn-primary"
               disabled={submitting || newAnswer.trim().length < 20}
-              style={{ marginTop: 12 }}
+              style={{ marginTop: 12, fontSize: 14, padding: '10px 20px' }}
             >
-              {submitting ? 'Publication...' : 'Publier ma réponse'}
+              {submitting ? 'Publication...' : 'Publier votre reponse'}
             </button>
           </form>
         </div>
       ) : (
         <div style={{
-          marginTop: 28, background: '#fff8f2',
-          border: '1px solid #f1d4b5', borderRadius: 6,
-          padding: 18, textAlign: 'center', fontSize: 14,
+          marginTop: 24, padding: 16,
+          background: '#f8f9fa', border: '1px solid #e3e6e8',
+          borderRadius: 6, textAlign: 'center',
         }}>
-          <Link to="/login" style={{ color: '#f48024', fontWeight: 600 }}>Connectez-vous</Link>
-          {' '}ou{' '}
-          <Link to="/register" style={{ color: '#f48024', fontWeight: 600 }}>créez un compte</Link>
-          {' '}pour poster une réponse.
+          <p style={{ fontSize: 14, color: '#525960', marginBottom: 10 }}>
+            Vous devez etre connecte pour repondre.
+          </p>
+          <Link to="/login">
+            <button className="btn btn-primary">Se connecter</button>
+          </Link>
         </div>
       )}
+
     </PageLayout>
   )
 }

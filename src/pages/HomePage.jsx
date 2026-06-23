@@ -61,7 +61,7 @@ export default function HomePage() {
             <button
               onClick={clearFilters}
               style={{
-                fontSize: 12, color: '#525960', background: 'none',
+                fontSize: 12, color: '#4b5d70', background: 'none',
                 border: 'none', cursor: 'pointer', marginTop: 4, padding: 0,
               }}
             >
@@ -81,7 +81,7 @@ export default function HomePage() {
       }}>
         <div style={{
           display: 'flex', gap: 0,
-          background: '#fff', border: '1px solid #d6d9dc',
+          background: '#fff', border: '1px solid #d7e1ee',
           borderRadius: 4, overflow: 'hidden',
         }}>
           {SORTS.map(s => (
@@ -90,9 +90,9 @@ export default function HomePage() {
               onClick={() => setParam('sort', s.key)}
               style={{
                 padding: '6px 14px', fontSize: 13, border: 'none',
-                cursor: 'pointer', borderRight: '1px solid #d6d9dc',
-                background: sort === s.key ? '#f48024' : '#fff',
-                color: sort === s.key ? '#fff' : '#525960',
+                cursor: 'pointer', borderRight: '1px solid #d7e1ee',
+                background: sort === s.key ? '#2563eb' : '#fff',
+                color: sort === s.key ? '#fff' : '#4b5d70',
                 fontWeight: sort === s.key ? 600 : 400,
                 transition: 'all 0.15s',
               }}
@@ -102,7 +102,7 @@ export default function HomePage() {
           ))}
         </div>
         {!loading && (
-          <span style={{ fontSize: 13, color: '#838c95' }}>
+          <span style={{ fontSize: 13, color: '#82929f' }}>
             {total} question{total !== 1 ? 's' : ''}
           </span>
         )}

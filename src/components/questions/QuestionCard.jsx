@@ -21,10 +21,15 @@ const TAG_COLORS = {
 export default function QuestionCard({ question }) {
   const navigate = useNavigate()
   const {
-    id, title, excerpt, tags = [],
-    votes, answersCount, author,
-    createdAt, solved
+    id, title,
+    tags = [],
+    author,
   } = question
+
+  const votes        = question.vote_count   ?? question.votes        ?? 0
+  const answersCount  = question.answer_count ?? question.answersCount ?? 0
+  const solved        = question.is_resolved  ?? question.solved       ?? false
+  const createdAt     = question.created_at   ?? question.createdAt
 
   return (
     <div style={{
@@ -38,7 +43,6 @@ export default function QuestionCard({ question }) {
       onMouseEnter={e => e.currentTarget.style.borderColor = '#c8ccd0'}
       onMouseLeave={e => e.currentTarget.style.borderColor = '#e3e6e8'}
     >
-      {/* Stats votes / réponses */}
       <div style={{
         display: 'flex', flexDirection: 'column',
         alignItems: 'center', gap: 8,
@@ -46,7 +50,7 @@ export default function QuestionCard({ question }) {
         color: '#525960', textAlign: 'center', flexShrink: 0,
       }}>
         <div>
-          <div style={{ fontSize: 16, fontWeight: 700, color: '#232629' }}>{votes}</div>
+          <div style={{ fontSize: 16, fontWeight: 700, color: '#232629' }}>{votes ?? 0}</div>
           <div style={{ fontSize: 11 }}>votes</div>
         </div>
         <div style={{
@@ -55,12 +59,11 @@ export default function QuestionCard({ question }) {
           border: solved ? 'none' : '1px solid #d6d9dc',
           borderRadius: 4, padding: '2px 6px',
         }}>
-          <div style={{ fontSize: 15, fontWeight: 700 }}>{answersCount}</div>
+          <div style={{ fontSize: 15, fontWeight: 700 }}>{answersCount ?? 0}</div>
           <div style={{ fontSize: 11 }}>{solved ? '✓ rép.' : 'rép.'}</div>
         </div>
       </div>
 
-      {/* Contenu */}
       <div style={{ flex: 1, minWidth: 0 }}>
         <Link
           to={`/question/${id}`}
@@ -72,28 +75,18 @@ export default function QuestionCard({ question }) {
         >
           {title}
         </Link>
-        <p style={{
-          fontSize: 13, color: '#525960',
-          margin: '5px 0 10px', lineHeight: 1.5,
-          display: '-webkit-box',
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: 'vertical',
-          overflow: 'hidden',
-        }}>
-          {excerpt}
-        </p>
 
-        {/* Tags + auteur */}
         <div style={{
           display: 'flex', alignItems: 'center',
-          gap: 6, flexWrap: 'wrap',
+          gap: 6, flexWrap: 'wrap', marginTop: 10,
         }}>
           {tags.map(tag => {
-            const c = TAG_COLORS[tag] || TAG_COLORS.default
+            const tagName = tag?.name || tag
+            const c = TAG_COLORS[tagName] || TAG_COLORS.default
             return (
               <span
-                key={tag}
-                onClick={() => navigate(`/?tag=${tag}`)}
+                key={tag?.id || tagName}
+                onClick={() => navigate(`/?tag=${tagName}`)}
                 style={{
                   fontSize: 12, padding: '2px 8px',
                   borderRadius: 4, cursor: 'pointer',
@@ -103,29 +96,28 @@ export default function QuestionCard({ question }) {
                 onMouseEnter={e => e.currentTarget.style.opacity = '0.75'}
                 onMouseLeave={e => e.currentTarget.style.opacity = '1'}
               >
-                {tag}
+                {tagName}
               </span>
             )
           })}
 
-          {/* Auteur */}
           <div style={{
             marginLeft: 'auto',
             display: 'flex', alignItems: 'center',
             gap: 5, fontSize: 11, color: '#838c95',
             flexShrink: 0,
           }}>
-            <Avatar name={author?.pseudo || '?'} size={18} src={author?.avatar} />
+            <Avatar name={author?.username || '?'} size={18} src={author?.avatar} />
             <Link
               to={`/user/${author?.id}`}
               style={{ color: '#0077cc', fontSize: 11, textDecoration: 'none' }}
             >
-              {author?.pseudo}
+              {author?.username}
             </Link>
-            <span>· {createdAt}</span>
+            <span>· {createdAt ? new Date(createdAt).toLocaleDateString('fr-FR') : ''}</span>
           </div>
-        </div>
+        </div> 
       </div>
     </div>
   )
-} 
+}
