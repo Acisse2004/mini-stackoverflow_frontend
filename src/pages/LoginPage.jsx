@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
@@ -37,27 +38,31 @@ export default function LoginPage() {
       setError('Google non disponible. Rechargez la page.')
       return
     }
-    window.google.accounts.id.cancel()
-    window.google.accounts.id.initialize({
-      client_id: GOOGLE_CLIENT_ID,
-      callback: async (response) => {
-        try {
-          const res = await fetch(`${BASE}/auth/google/`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ token: response.credential })
-          })
-          const data = await res.json()
-          if (!res.ok) throw new Error()
-          login(data.user, data.access, data.refresh)
-          navigate('/')
-        } catch {
-          setError('Erreur lors de la connexion Google.')
-        }
-      }
-    })
     window.google.accounts.id.prompt()
   }
+
+  useEffect(() => {
+    if (window.google) {
+      window.google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: async (response) => {
+          try {
+            const res = await fetch(`${BASE}/auth/google/`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ token: response.credential })
+            })
+            const data = await res.json()
+            if (!res.ok) throw new Error()
+            login(data.user, data.access, data.refresh)
+            navigate('/')
+          } catch {
+            setError('Erreur lors de la connexion Google.')
+          }
+        }
+      })
+    }
+  }, [])
 
   return (
     <div style={{
