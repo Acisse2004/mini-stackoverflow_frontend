@@ -37,6 +37,7 @@ export default function LoginPage() {
       setError('Google non disponible. Rechargez la page.')
       return
     }
+    window.google.accounts.id.cancel()
     window.google.accounts.id.initialize({
       client_id: GOOGLE_CLIENT_ID,
       callback: async (response) => {
