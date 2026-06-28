@@ -3,6 +3,9 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { authApi } from '../api/authApi'
 
+const BASE = 'https://mini-stackoverflow-backend-8kcy.onrender.com/api'
+const GOOGLE_CLIENT_ID = '650552796390-kac8uqf1729kdt2km9ke0og5jni08bkh.apps.googleusercontent.com'
+
 export default function LoginPage() {
   const { login } = useAuth()
   const navigate  = useNavigate()
@@ -27,6 +30,32 @@ export default function LoginPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleGoogleLogin = () => {
+    if (!window.google) {
+      setError('Google non disponible. Rechargez la page.')
+      return
+    }
+    window.google.accounts.id.initialize({
+      client_id: GOOGLE_CLIENT_ID,
+      callback: async (response) => {
+        try {
+          const res = await fetch(`${BASE}/auth/google/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: response.credential })
+          })
+          const data = await res.json()
+          if (!res.ok) throw new Error()
+          login(data.user, data.access, data.refresh)
+          navigate('/')
+        } catch {
+          setError('Erreur lors de la connexion Google.')
+        }
+      }
+    })
+    window.google.accounts.id.prompt()
   }
 
   return (
@@ -110,6 +139,28 @@ export default function LoginPage() {
               {loading ? 'Connexion...' : 'Se connecter'}
             </button>
           </form>
+
+          {/* Séparateur */}
+          <div style={{ display: 'flex', alignItems: 'center', margin: '16px 0' }}>
+            <div style={{ flex: 1, height: 1, background: '#d7e1ee' }} />
+            <span style={{ margin: '0 10px', fontSize: 12, color: '#888' }}>ou</span>
+            <div style={{ flex: 1, height: 1, background: '#d7e1ee' }} />
+          </div>
+
+          {/* Bouton Google */}
+          <button
+            onClick={handleGoogleLogin}
+            style={{
+              width: '100%', padding: '9px',
+              background: '#fff', color: '#333',
+              border: '1px solid #d7e1ee', borderRadius: 4,
+              fontSize: 14, fontWeight: 600, cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8
+            }}
+          >
+            <img src="https://www.google.com/favicon.ico" width={16} height={16} alt="Google" />
+            Continuer avec Google
+          </button>
         </div>
 
         {/* Lien inscription */}
@@ -123,7 +174,6 @@ export default function LoginPage() {
             Creer un compte
           </Link>
         </div>
-
       </div>
     </div>
   )
